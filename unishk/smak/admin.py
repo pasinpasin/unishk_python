@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Fakulteti,Departamenti,Programi
+from .models import Fakulteti,Departamenti,Programi,Profile
+
 
 
 
@@ -26,3 +27,8 @@ class ProgramiAdmin(admin.ModelAdmin):
     search_fields = ['emertimi','departamenti']
     date_hierarchy = 'created'
     ordering = ['updated', 'created']
+
+@admin.register(Profile)
+class ProfileAdmin(admin.ModelAdmin):
+    list_display = ['user', 'atesia', 'photo', 'roli', 'departamenti']
+    raw_id_fields = ['user']
