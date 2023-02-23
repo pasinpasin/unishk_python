@@ -1,6 +1,9 @@
 from django.urls import path,include
 from rest_framework import routers
 from . import views
+from rest_framework_simplejwt.views import (
+    TokenRefreshView,
+)
 
 app_name = 'smak'
 
@@ -12,10 +15,9 @@ urlpatterns = [
     #path('fakultetet/',views.FakultetiListView.as_view(),name='fakulteti_list'),
     path('fakulteti/<pk>/',views.FakultetiDetailView.as_view(),name='fakulteti_detail'),
     path('departamentet/',views.DepartamentiListView.as_view(),name='departamenti_list'),
-    path('api-auth/',include('rest_framework.urls')),
-    path('csrf_cookie/',views.getCSRFToken.as_view()),
-    path('authenticated/',views.checkAuthenticatedView.as_view()),
-    path('login/',views.LoginView.as_view()),
+    path('token/', views.MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('register/', views.RegisterView.as_view(), name='auth_register'),
     path('', include(router.urls)),
 
 

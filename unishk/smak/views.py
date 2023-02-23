@@ -1,6 +1,9 @@
 from rest_framework import generics,viewsets,permissions
+from rest_framework import status
 from .models import Fakulteti,Departamenti
-from .serializers import FakultetiSerializer,DepartamentiSerializer
+from .serializers import FakultetiSerializer,DepartamentiSerializer,MyTokenObtainPairSerializer,RegisterSerializer
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework.views import APIView
@@ -13,52 +16,35 @@ from django.contrib.auth import authenticate, login
 
 
 
-@method_decorator(ensure_csrf_cookie,name="dispatch")
-class getCSRFToken(APIView):
-    permission_classes=(permissions.AllowAny,)
-    def get (self,request,format=None):
-        return Response({ "success":"cookie set"})
-    
-@method_decorator(ensure_csrf_cookie,name="dispatch")
-class checkAuthenticatedView(APIView):
-    def get (self,request,format=None):
-        try:
-            isAuthenticated= User.is_authenticated
-            if isAuthenticated:
-                return Response({ "isAuthenticated":"success"}
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
 
-                )
-            else:
-                return Response({ "isAuthenticated":"error"}
-
-                )
-        except:
-            return Response({ "error":"something went wrong"})
-
-        
-@method_decorator(ensure_csrf_cookie,name="dispatch")
-class LoginView(APIView):
-    def post (self,request,format=None):
-
-        data=self.request.data
-        username=data['username']
-        password=data['password']
-        try:
-            user=authenticate(username=username,password=password)
-            
-            if user is not None:
-                login(request,user)
-                return Response({ "success":"User authenticated","username":username}
-
-                )
-            else:
-                return Response({ "error":"error authenticating"}
-
-                )
-        except:
-             return Response({ "error":"something went wrong"})
+class RegisterView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    permission_classes = (AllowAny,)
+    serializer_class = RegisterSerializer
 
 
+@api_view(['GET'])
+def getRoutes(request):
+    routes = [
+        '/api/token/',
+        '/api/register/',
+        '/api/token/refresh/'
+    ]
+    return Response(routes)
+
+api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def testEndPoint(request):
+    if request.method == 'GET':
+        data = f"Congratulation {request.user}, your API just responded to GET request"
+        return Response({'response': data}, status=status.HTTP_200_OK)
+    elif request.method == 'POST':
+        text = request.POST.get('text')
+        data = f'Congratulation your API just responded to POST request with text: {text}'
+        return Response({'response': data}, status=status.HTTP_200_OK)
+    return Response({}, status.HTTP_400_BAD_REQUEST)
             
         
 
